@@ -3,17 +3,13 @@ package ru.job4j.todo.store;
 import lombok.AllArgsConstructor;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
-import ru.job4j.todo.configuration.HibernateConfiguration;
 import ru.job4j.todo.model.Task;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @AllArgsConstructor
-public class HiberTaskStore implements TaskStore {
+public class HBRTaskStore implements TaskStore {
 
     private final SessionFactory sf;
 
@@ -33,11 +29,11 @@ public class HiberTaskStore implements TaskStore {
 
     @Override
     public boolean update(Task task) {
-        var updated = false;
+        var isUpdated = false;
         try (var session = sf.getCurrentSession()) {
             var transaction = session.beginTransaction();
             try {
-                updated = session.createQuery("""
+                isUpdated = session.createQuery("""
                                 update Task set title = :fTitle, description = :fDescription, created = :fCreated, done = :fDone where id = :fId
                                 """)
                         .setParameter("fTitle", task.getTitle())
@@ -50,23 +46,23 @@ public class HiberTaskStore implements TaskStore {
                 transaction.rollback();
             }
         }
-        return updated;
+        return isUpdated;
     }
 
     @Override
     public boolean deleteById(Long id) {
-        var deleted = false;
+        var isDeleted = false;
         try (var session = sf.getCurrentSession()) {
             var transaction = session.beginTransaction();
             try {
-                deleted = session.createQuery("delete from Task where id = :fId")
+                isDeleted = session.createQuery("delete from Task where id = :fId")
                         .setParameter("fId", id)
                         .executeUpdate() > 0;
             } catch (Exception e) {
                 transaction.rollback();
             }
         }
-        return deleted;
+        return isDeleted;
     }
 
     @Override
@@ -88,7 +84,7 @@ public class HiberTaskStore implements TaskStore {
 
     @Override
     public Collection<Task> findAll() {
-        List<Task> tasks = new ArrayList<>();
+        List<Task> tasks = new LinkedList<>();
         try (var session = sf.getCurrentSession()) {
             var transaction = session.beginTransaction();
             try {
@@ -112,7 +108,7 @@ public class HiberTaskStore implements TaskStore {
     }
 
     private Collection<Task> findTasksByStatus(boolean status) {
-        List<Task> newTasks = new ArrayList<>();
+        List<Task> newTasks = new LinkedList<>();
         try (var session = sf.getCurrentSession()) {
             var transaction = session.beginTransaction();
             try {
