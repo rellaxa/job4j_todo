@@ -1,49 +1,37 @@
 package ru.job4j.todo.store;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import ru.job4j.todo.model.User;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
 public class HBRUserStore implements UserStore {
 
-	private final SessionFactory sf;
+	private final CrudRepository crudRepository;
 
 	@Override
 	public Optional<User> save(User user) {
-		try (Session session = sf.openSession()) {
-			var transaction = session.beginTransaction();
-			try {
-				session.save(user);
-				transaction.commit();
-				return Optional.of(user);
-			} catch (Exception e) {
-				transaction.rollback();
-				return Optional.empty();
-			}
+		Optional<User> savedUser = Optional.of(user);
+		try {
+			crudRepository.run(session -> session.persist(user));
+		} catch (Exception e) {
+			savedUser = Optional.empty();
 		}
+		return savedUser;
 	}
 
 	@Override
 	public Optional<User> findByLoginAndPassword(String login, String password) {
-		try (Session session = sf.openSession()) {
-			var transaction = session.beginTransaction();
-			try {
-				var optionalUser = session.createQuery("from User where login = :fLogin and password = :fPassword", User.class)
-						.setParameter("fLogin", login)
-						.setParameter("fPassword", password)
-						.uniqueResultOptional();
-				transaction.commit();
-				return optionalUser;
-			} catch (Exception e) {
-				transaction.rollback();
-				return Optional.empty();
-			}
-		}
+		return crudRepository.optional(
+				"from User where login = :fLogin and password = :fPassword", User.class,
+				Map.of(
+						"fLogin", login,
+						"fPassword", password
+				)
+		);
 	}
 }

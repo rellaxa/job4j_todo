@@ -27,9 +27,8 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute User user, Model model, HttpServletRequest request) {
+    public String register(@ModelAttribute("newUser") User user, Model model, HttpServletRequest request) {
         var savedUser = userService.save(user);
-        System.out.println(savedUser);
         if (savedUser.isEmpty()) {
             var error = String.format("User with login: %s already exists.", user.getLogin());
             model.addAttribute("error", error);
