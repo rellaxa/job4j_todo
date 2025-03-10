@@ -40,6 +40,7 @@
                     <th>Title</th>
                     <th>Created</th>
                     <th>Status</th>
+                    <th>User</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -59,6 +60,7 @@
                             <i class="bi bi-square text-secondary"></i>
                         </span>
                     </td>
+                    <td th:text="${task.userName}"></td>
                 </tr>
                 </tbody>
             </table>

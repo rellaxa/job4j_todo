@@ -63,4 +63,5 @@ public class HBRTaskStore implements TaskStore {
 		return crudRepository.query("from Task where done = :fDone order by id", Task.class,
 				Map.of("fDone", status));
 	}
+
 }

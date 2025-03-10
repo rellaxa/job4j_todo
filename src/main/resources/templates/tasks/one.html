@@ -65,10 +65,14 @@
             <p>
                 <strong>Created:</strong>
                 <span class="text-muted" th:text="${#temporals.format(task.created, 'dd.MM.yyyy HH:mm')}"></span>
+                <span class="mx-2"></span>
+                <i class="bi bi-person-circle me-1 text-secondary"></i>
+                <strong>by:</strong>
+                <span class="text-muted ms-1" th:text="${task.user.name}"></span>
             </p>
             <div>
                 <strong>Description:</strong>
-                <p class="mt-2" th:text="${task.description}">Task description goes here.</p>
+                <p class="mt-0" th:text="${task.description}">Task description goes here.</p>
             </div>
         </div>
         <!-- Нижняя часть карточки с кнопками -->

@@ -13,4 +13,6 @@ public class TaskDto {
     private LocalDateTime created;
 
     private boolean done;
+
+    private String userName;
 }

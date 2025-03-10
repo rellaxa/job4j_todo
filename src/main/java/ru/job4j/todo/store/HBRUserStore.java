@@ -15,13 +15,12 @@ public class HBRUserStore implements UserStore {
 
 	@Override
 	public Optional<User> save(User user) {
-		Optional<User> savedUser = Optional.of(user);
 		try {
 			crudRepository.run(session -> session.persist(user));
+			return Optional.of(user);
 		} catch (Exception e) {
-			savedUser = Optional.empty();
+			return Optional.empty();
 		}
-		return savedUser;
 	}
 
 	@Override
@@ -34,4 +33,5 @@ public class HBRUserStore implements UserStore {
 				)
 		);
 	}
+
 }
