@@ -9,7 +9,6 @@ import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.store.TaskStore;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -33,8 +32,13 @@ public class SimpleTaskService implements TaskService {
 	}
 
 	@Override
-	public boolean deleteById(Long id) {
-		return taskStore.deleteById(id);
+	public boolean switchStatusByUser(Long id, User user, boolean status) {
+		return taskStore.switchStatusByUser(id, user.getId(), status);
+	}
+
+	@Override
+	public boolean deleteByIdAndUser(Long id, User user) {
+		return taskStore.deleteByIdAndUser(id, user.getId());
 	}
 
 	@Override
@@ -44,25 +48,25 @@ public class SimpleTaskService implements TaskService {
 
 	@Override
 	public Collection<TaskDto> getAll() {
-		var dtoTasks = new ArrayList<TaskDto>();
-		for (var task : taskStore.findAll()) {
-			dtoTasks.add(createTaskDto(task));
-		}
-		return dtoTasks;
+		return taskStore.findAll().stream()
+				.map(this::createTaskDto)
+				.toList();
 	}
 
 	@Override
 	public Collection<TaskDto> getCompletedTasks() {
-		var completedTasks = new ArrayList<TaskDto>();
-		taskStore.findCompletedTasks().forEach(task -> completedTasks.add(createTaskDto(task)));
-		return completedTasks;
+		return tasksByStatus(true);
 	}
 
 	@Override
 	public Collection<TaskDto> getNewTasks() {
-		var newTasks = new ArrayList<TaskDto>();
-		taskStore.findNewTasks().forEach(task -> newTasks.add(createTaskDto(task)));
-		return newTasks;
+		return tasksByStatus(false);
+	}
+
+	private Collection<TaskDto> tasksByStatus(boolean status) {
+		return taskStore.findTasksByStatus(status).stream()
+				.map(this::createTaskDto)
+				.toList();
 	}
 
 	private TaskDto createTaskDto(Task task) {

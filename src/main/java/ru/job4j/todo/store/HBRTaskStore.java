@@ -3,6 +3,7 @@ package ru.job4j.todo.store;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.job4j.todo.model.Task;
+import ru.job4j.todo.store.utils.CrudRepository;
 
 import java.util.*;
 
@@ -20,47 +21,42 @@ public class HBRTaskStore implements TaskStore {
 
 	@Override
 	public boolean update(Task task) {
-		return crudRepository.run("""
-								update Task set title = :fTitle, description = :fDescription, created = :fCreated, done = :fDone where id = :fId
-								""",
-						Map.of("fTitle", task.getTitle(),
-								"fDescription", task.getDescription(),
-								"fCreated", task.getCreated(),
-								"fDone", task.isDone(),
-								"fId", task.getId()
-						)
+		return crudRepository.tx(session -> session.merge(task)) != null;
+	}
+
+	@Override
+	public boolean switchStatusByUser(Long id, Long userId, boolean done) {
+		return crudRepository.run("update Task set done = :fDone where id = :fId and user_id = :fUserId",
+				Map.of("fDone", done,
+						"fId", id,
+						"fUserId", userId
+				)
 		);
 	}
 
 	@Override
-	public boolean deleteById(Long id) {
-		return crudRepository.run("delete from Task where id = :fId",
-				Map.of("fId", id));
+	public boolean deleteByIdAndUser(Long id, Long userId) {
+		return crudRepository.run("delete from Task where id = :fId and user_id = :fUserId",
+				Map.of("fId", id,
+						"fUserId", userId
+				)
+		);
 	}
 
 	@Override
 	public Optional<Task> findById(Long id) {
-		return crudRepository.optional("from Task where id = :fId", Task.class,
+		return crudRepository.optional("from Task t JOIN FETCH t.priority where t.id = :fId", Task.class,
 				Map.of("fId", id));
 	}
 
 	@Override
 	public Collection<Task> findAll() {
-		return crudRepository.query("from Task order by id", Task.class);
+		return crudRepository.query("from Task t JOIN FETCH t.priority order by t.id ASC", Task.class);
 	}
 
 	@Override
-	public Collection<Task> findCompletedTasks() {
-		return findTasksByStatus(true);
-	}
-
-	@Override
-	public Collection<Task> findNewTasks() {
-		return findTasksByStatus(false);
-	}
-
-	private Collection<Task> findTasksByStatus(boolean status) {
-		return crudRepository.query("from Task where done = :fDone order by id", Task.class,
+	public Collection<Task> findTasksByStatus(boolean status) {
+		return crudRepository.query("from Task t JOIN FETCH t.priority where t.done = :fDone order by t.id ASC", Task.class,
 				Map.of("fDone", status));
 	}
 

@@ -39,6 +39,7 @@
                     <th>№</th>
                     <th>Title</th>
                     <th>Created</th>
+                    <th>Priority</th>
                     <th>Status</th>
                     <th>User</th>
                 </tr>
@@ -52,6 +53,13 @@
                            class="task-link"></a>
                     </td>
                     <td th:text="${#temporals.format(task.created, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${task.priorityName == 'urgently'} ? ' border border-danger text-danger' :
+                              ' border border-secondary text-secondary'"
+                              th:text="${task.priorityName}">
+                        </span>
+                    </td>
                     <td>
                         <span>
                             <i class="bi bi-check-square text-success"></i>

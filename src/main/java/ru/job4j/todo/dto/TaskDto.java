@@ -15,4 +15,6 @@ public class TaskDto {
     private boolean done;
 
     private String userName;
+
+    private String priorityName;
 }

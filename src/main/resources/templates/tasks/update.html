@@ -49,6 +49,7 @@
             <h3 class="card-title mb-4 text-center">Update task</h3>
             <form th:action="@{/tasks/update}" method="POST" th:object="${task}">
                 <input type="hidden" name="id" th:field="*{id}">
+                <input type="hidden" name="user.id" th:field="*{user.id}">
                 <p>
                     <strong>Created:</strong>
                     <span class="text-muted" th:text="${#temporals.format(task.created, 'dd.MM.yyyy HH:mm')}"></span>
@@ -62,6 +63,16 @@
                     <label for="description" class="form-label"><b>Description:</b></label>
                     <textarea class="form-control" name="description" id="description" rows="3" th:field="*{description}"
                               placeholder="Describe the task"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="form-label"><b>Priority:</b></label>
+                    <select class="form-control" id="form-label" name="priority.id">
+                        <option th:each="priority : ${priorities}"
+                                th:selected="${priority.id == task.priority.id}"
+                                th:value="${priority.id}"
+                                th:text="${priority.name}">
+                        </option>
+                    </select>
                 </div>
                 <div class="row">
                     <div class="col-6">

@@ -13,7 +13,9 @@ public interface TaskService {
 
     boolean update(Task task);
 
-    boolean deleteById(Long id);
+    boolean switchStatusByUser(Long id, User user, boolean status);
+
+    boolean deleteByIdAndUser(Long id, User user);
 
     Optional<Task> findById(Long id);
 

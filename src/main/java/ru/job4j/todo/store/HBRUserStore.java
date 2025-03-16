@@ -3,6 +3,7 @@ package ru.job4j.todo.store;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.job4j.todo.model.User;
+import ru.job4j.todo.store.utils.CrudRepository;
 
 import java.util.Map;
 import java.util.Optional;

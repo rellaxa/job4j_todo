@@ -9,12 +9,14 @@ import javax.persistence.*;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor()
 @AllArgsConstructor
 public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@EqualsAndHashCode.Include
 	private Long id;
 
 	private String name;

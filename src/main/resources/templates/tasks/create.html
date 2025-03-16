@@ -46,17 +46,26 @@
 <div class="container">
     <div class="card card-form shadow-sm">
         <div class="card-body">
-            <h3 class="card-title mb-4 text-center">Create New Task</h3>
+            <h3 class="card-title mb-4 text-center">New Task</h3>
             <form th:action="@{/tasks/create}" method="POST">
                 <div class="mb-3">
-                    <label for="title" class="form-label"><b>Name</b></label>
+                    <label for="title" class="form-label"><b>Name:</b></label>
                     <input type="text" class="form-control" name="title" id="title"
                            placeholder="Just a simple title, e.g. Task 1" required>
                 </div>
                 <div class="mb-3">
-                    <label for="description" class="form-label"><b>Description</b></label>
+                    <label for="description" class="form-label"><b>Description:</b></label>
                     <textarea class="form-control" name="description" id="description" rows="3"
                               placeholder="Describe the task"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="form-label"><b>Priority:</b></label>
+                    <select class="form-control" id="form-label" name="priority.id">
+                        <option th:each="priority : ${priorities}"
+                                th:value="${priority.id}"
+                                th:text="${priority.name}">
+                        </option>
+                    </select>
                 </div>
                 <div class="row">
                     <div class="col-6">

@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.job4j.todo.dto.TaskDto;
 import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
+import ru.job4j.todo.service.PriorityService;
 import ru.job4j.todo.service.TaskService;
-
-import java.util.Collection;
 
 @Controller
 @RequestMapping({"/", "/tasks",})
@@ -19,10 +17,11 @@ public class TaskController {
 
 	private final TaskService taskService;
 
+	private final PriorityService priorityService;
+
 	@GetMapping
 	public String getAllTasks(Model model) {
-		Collection<TaskDto> allTasks = taskService.getAll();
-		model.addAttribute("tasks", allTasks);
+		model.addAttribute("tasks", taskService.getAll());
 		return "/tasks/allTasks";
 	}
 
@@ -39,7 +38,8 @@ public class TaskController {
 	}
 
 	@GetMapping("/create")
-	public String getCreationPage() {
+	public String getCreationPage(Model model) {
+		model.addAttribute("priorities", priorityService.findAll());
 		return "/tasks/create";
 	}
 
@@ -50,57 +50,61 @@ public class TaskController {
 	}
 
 	@GetMapping("{id}")
-	public String getTask(@PathVariable Long id, Model model) {
-		var taskOptional = taskService.findById(id);
-		if (taskOptional.isEmpty()) {
-			model.addAttribute("error", "Task with id " + id + " not found.");
+	public String getTask(@PathVariable Long id, @SessionAttribute User user, Model model) {
+		if (taskByUser(id, user, model)) {
 			return "/errors/404";
 		}
-		model.addAttribute("task", taskOptional.get());
 		return "/tasks/one";
 	}
 
 	@GetMapping("/update/{id}")
-	public String getUpdateTaskPage(@PathVariable Long id, Model model) {
-		var taskOptional = taskService.findById(id);
-		if (taskOptional.isEmpty()) {
-			model.addAttribute("error", "Task with id " + id + " not found.");
+	public String getUpdateTaskPage(@PathVariable Long id, @SessionAttribute User user, Model model) {
+		if (taskByUser(id, user, model)) {
 			return "/errors/404";
 		}
-		model.addAttribute("task", taskOptional.get());
+		model.addAttribute("priorities", priorityService.findAll());
 		return "/tasks/update";
 	}
 
-	@PostMapping("/update")
-	public String updateTask(@ModelAttribute Task task, Model model) {
-		var isUpdated = taskService.update(task);
-		if (!isUpdated) {
-			model.addAttribute("error", "Task with id " + task.getId() + " not found.");
-			return "/errors/404";
+	private boolean taskByUser(@PathVariable Long id, @SessionAttribute User user, Model model) {
+		var taskOptional = taskService.findById(id);
+		if (taskOptional.isEmpty()) {
+			model.addAttribute("error", "Task with id " + id + " not found.");
+			return true;
 		}
+		var task = taskOptional.get();
+		if (!task.getUser().equals(user)) {
+			model.addAttribute("error", "You do not have permission to edit this task.");
+			return true;
+		}
+		model.addAttribute("task", task);
+		return false;
+	}
+
+	@PostMapping("/update")
+	public String updateTask(@ModelAttribute Task task) {
+		taskService.update(task);
 		return "redirect:/tasks";
 	}
 
 	@GetMapping("/delete/{id}")
-	public String deleteTask(@PathVariable Long id, Model model) {
-		var isDeleted = taskService.deleteById(id);
+	public String deleteTask(@PathVariable Long id, @SessionAttribute User user, Model model) {
+		var isDeleted = taskService.deleteByIdAndUser(id, user);
 		if (!isDeleted) {
-			model.addAttribute("error", "Task with id " + id + " not found.");
+			model.addAttribute("error", "Task with id " + id + " not found or you have no permission to delete this task.");
 			return "/errors/404";
 		}
 		return "redirect:/tasks";
 	}
 
-	@GetMapping("/switchStatus/{id}")
-	public String switchStatus(@PathVariable Long id, Model model) {
-		var taskOptional = taskService.findById(id);
-		if (taskOptional.isEmpty()) {
-			model.addAttribute("error", "Task with id " + id + " not found.");
+	@GetMapping("/switchStatus/{id}/{status}")
+	public String switchStatus(@PathVariable Long id, @PathVariable boolean status,
+							   @SessionAttribute User user, Model model) {
+		var isSuccess = taskService.switchStatusByUser(id, user, status);
+		if (!isSuccess) {
+			model.addAttribute("error", "Task with id " + id + " not found or you have no permission to edit this task.");
 			return "/errors/404";
 		}
-		var task = taskOptional.get();
-		task.setDone(!task.isDone());
-		taskService.update(task);
 		return "redirect:/tasks";
 	}
 }

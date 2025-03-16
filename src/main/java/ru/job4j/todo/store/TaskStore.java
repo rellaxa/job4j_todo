@@ -11,13 +11,13 @@ public interface TaskStore {
 
     boolean update(Task task);
 
-    boolean deleteById(Long id);
+    boolean switchStatusByUser(Long id, Long userId, boolean done);
+
+    boolean deleteByIdAndUser(Long id, Long userId);
 
     Optional<Task> findById(Long id);
 
     Collection<Task> findAll();
 
-    Collection<Task> findCompletedTasks();
-
-    Collection<Task> findNewTasks();
+    Collection<Task> findTasksByStatus(boolean done);
 }

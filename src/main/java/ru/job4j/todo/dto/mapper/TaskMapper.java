@@ -8,8 +8,9 @@ import ru.job4j.todo.model.Task;
 @Mapper
 public interface TaskMapper {
 
-    @Mapping(target = "userName", expression = "java(taskEntity.getUser().getName())")
-    TaskDto getDtoFromEntity(Task taskEntity);
+    @Mapping(target = "userName", expression = "java(entity.getUser().getName())")
+    @Mapping(target = "priorityName", expression = "java(entity.getPriority().getName())")
+    TaskDto getDtoFromEntity(Task entity);
 
     Task getEntityFromDto(TaskDto dto);
 
