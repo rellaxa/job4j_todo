@@ -8,12 +8,14 @@
         body {
             background-color: #f8f9fa;
         }
+
         .card-form {
             background-color: #f0f0f0;
             max-width: 600px;
             margin: 2rem auto;
             padding: 1.5rem;
         }
+
         .card:hover {
             transform: none !important;
             transition: none !important;
@@ -56,7 +58,7 @@
                 <div class="mb-3">
                     <label for="description" class="form-label"><b>Description:</b></label>
                     <textarea class="form-control" name="description" id="description" rows="3"
-                              placeholder="Describe the task"></textarea>
+                              placeholder="Describe the task" required></textarea>
                 </div>
                 <div class="mb-3">
                     <label for="form-label"><b>Priority:</b></label>
@@ -66,6 +68,17 @@
                                 th:text="${priority.name}">
                         </option>
                     </select>
+                </div>
+                <div class="mb-3">
+                    <label for="category"><b>Category:</b></label>
+                    <div id="category">
+                        <div th:each="category : ${categories}" class="form-check form-check-inline" multiple="multiple">
+                            <label class="form-check-label d-flex align-items-center ">
+                                <input class="form-check-input" type="checkbox" name="categoriesId" th:value="${category.id}">
+                                <span th:text="${category.name}"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-6">

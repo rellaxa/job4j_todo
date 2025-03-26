@@ -6,8 +6,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
+import ru.job4j.todo.service.CategoryService;
 import ru.job4j.todo.service.PriorityService;
 import ru.job4j.todo.service.TaskService;
+
+import java.util.Set;
 
 @Controller
 @RequestMapping({"/", "/tasks",})
@@ -18,6 +21,8 @@ public class TaskController {
 	private final TaskService taskService;
 
 	private final PriorityService priorityService;
+
+	private final CategoryService categoryService;
 
 	@GetMapping
 	public String getAllTasks(Model model) {
@@ -40,12 +45,17 @@ public class TaskController {
 	@GetMapping("/create")
 	public String getCreationPage(Model model) {
 		model.addAttribute("priorities", priorityService.findAll());
+		model.addAttribute("categories", categoryService.findAll());
 		return "/tasks/create";
 	}
 
 	@PostMapping("/create")
-	public String create(@ModelAttribute Task task, @SessionAttribute User user) {
-		taskService.save(task, user);
+	public String create(@ModelAttribute Task task, @RequestParam(required = false) Set<Integer> categoriesId, @SessionAttribute User user, Model model) {
+		if (categoriesId == null) {
+			model.addAttribute("error", "Please select at least one category.");
+			return "/errors/404";
+		}
+		taskService.save(task, user, categoriesId);
 		return "redirect:/tasks";
 	}
 
@@ -63,6 +73,7 @@ public class TaskController {
 			return "/errors/404";
 		}
 		model.addAttribute("priorities", priorityService.findAll());
+		model.addAttribute("allCategories", categoryService.findAll());
 		return "/tasks/update";
 	}
 
@@ -82,8 +93,12 @@ public class TaskController {
 	}
 
 	@PostMapping("/update")
-	public String updateTask(@ModelAttribute Task task) {
-		taskService.update(task);
+	public String updateTask(@ModelAttribute Task task, @RequestParam(required = false) Set<Integer> categoriesId, Model model) {
+		if (categoriesId == null) {
+			model.addAttribute("error", "At least one category is required.");
+			return "/errors/404";
+		}
+		taskService.update(task, categoriesId);
 		return "redirect:/tasks";
 	}
 

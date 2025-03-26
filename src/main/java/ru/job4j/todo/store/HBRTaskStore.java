@@ -45,7 +45,7 @@ public class HBRTaskStore implements TaskStore {
 
 	@Override
 	public Optional<Task> findById(Long id) {
-		return crudRepository.optional("from Task t JOIN FETCH t.priority where t.id = :fId", Task.class,
+		return crudRepository.optional("from Task t JOIN FETCH t.priority JOIN FETCH t.categories where t.id = :fId", Task.class,
 				Map.of("fId", id));
 	}
 

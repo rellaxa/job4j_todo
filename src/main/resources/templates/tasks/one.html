@@ -70,10 +70,21 @@
             </p>
             <p>
                 <strong>Priority: </strong>
-                <span class="badge ms-2"
+                <span class="badge ms-1"
                       th:classappend="${task.priority.name == 'urgently'} ? ' border border-danger text-danger'
                         : ' border border-secondary text-secondary'"
                       th:text="${task.priority.name}">
+                </span>
+            </p>
+            <p class="card-text">
+                <strong>Categories: </strong>
+                <span th:each="category : ${task.categories}"
+                      class="badge ms-1"
+                      style="font-size: 0.75rem;"
+                      th:classappend="${category.name == 'Work'} ? ' badge-primary text-white' :
+                          (${category.name == 'Personal'} ? ' badge-success text-white' :
+                          (${category.name == 'Health and Fitness'} ? ' badge-warning text-white' : ''))"
+                      th:text="${category.name}">
                 </span>
             </p>
             <p>

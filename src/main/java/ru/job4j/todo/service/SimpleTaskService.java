@@ -9,8 +9,7 @@ import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.store.TaskStore;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -20,15 +19,24 @@ public class SimpleTaskService implements TaskService {
 
 	private final TaskMapper taskMapper = Mappers.getMapper(TaskMapper.class);
 
+	private final CategoryService categoryService;
+
 	@Override
-	public Task save(Task task, User user) {
+	public Task save(Task task, User user, Set<Integer> categoriesId) {
+		updateCategories(task, categoriesId);
 		task.setUser(user);
 		return taskStore.save(task);
 	}
 
 	@Override
-	public boolean update(Task task) {
+	public boolean update(Task task, Set<Integer> categoriesId) {
+		updateCategories(task, categoriesId);
 		return taskStore.update(task);
+	}
+
+	private void updateCategories(Task task, Set<Integer> categoriesId) {
+		var categories = categoryService.findCategoriesById(categoriesId);
+		task.setCategories(Set.copyOf(categories));
 	}
 
 	@Override

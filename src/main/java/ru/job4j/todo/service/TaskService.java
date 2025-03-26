@@ -6,12 +6,13 @@ import ru.job4j.todo.model.User;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TaskService {
 
-    Task save(Task task, User user);
+    Task save(Task task, User user, Set<Integer> categoriesId);
 
-    boolean update(Task task);
+    boolean update(Task task, Set<Integer> categoriesId);
 
     boolean switchStatusByUser(Long id, User user, boolean status);
 
