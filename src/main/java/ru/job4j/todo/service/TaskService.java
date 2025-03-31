@@ -20,9 +20,11 @@ public interface TaskService {
 
     Optional<Task> findById(Long id);
 
-    Collection<TaskDto> getAll();
+    Collection<TaskDto> getAll(User user);
 
-    Collection<TaskDto> getCompletedTasks();
+    Collection<TaskDto> getCompletedTasks(User user);
 
-    Collection<TaskDto> getNewTasks();
+    Collection<TaskDto> getNewTasks(User user);
+
+    void setTimeZoneByUser(Task task, User user);
 }

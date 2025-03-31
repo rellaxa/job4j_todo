@@ -9,6 +9,7 @@ import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.store.TaskStore;
 
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -55,29 +56,39 @@ public class SimpleTaskService implements TaskService {
 	}
 
 	@Override
-	public Collection<TaskDto> getAll() {
+	public Collection<TaskDto> getAll(User user) {
 		return taskStore.findAll().stream()
-				.map(this::createTaskDto)
+				.map(task -> createTaskDto(task, user))
 				.toList();
 	}
 
 	@Override
-	public Collection<TaskDto> getCompletedTasks() {
-		return tasksByStatus(true);
+	public Collection<TaskDto> getCompletedTasks(User user) {
+		return tasksByStatus(true, user);
 	}
 
 	@Override
-	public Collection<TaskDto> getNewTasks() {
-		return tasksByStatus(false);
+	public Collection<TaskDto> getNewTasks(User user) {
+		return tasksByStatus(false, user);
 	}
 
-	private Collection<TaskDto> tasksByStatus(boolean status) {
+	@Override
+	public void setTimeZoneByUser(Task task, User user) {
+		var time = task.getCreated()
+				.atZone(ZoneId.of("UTC"))
+				.withZoneSameInstant(ZoneId.of(user.getTimezone()))
+				.toLocalDateTime();
+		task.setCreated(time);
+	}
+
+	private Collection<TaskDto> tasksByStatus(boolean status, User user) {
 		return taskStore.findTasksByStatus(status).stream()
-				.map(this::createTaskDto)
+				.map(task -> createTaskDto(task, user))
 				.toList();
 	}
 
-	private TaskDto createTaskDto(Task task) {
+	private TaskDto createTaskDto(Task task, User user) {
+		setTimeZoneByUser(task, user);
 		return taskMapper.getDtoFromEntity(task);
 	}
 }

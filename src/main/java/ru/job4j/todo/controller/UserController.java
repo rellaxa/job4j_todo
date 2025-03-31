@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.job4j.todo.controller.utils.TimeZoneStorage;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.UserService;
 
@@ -17,12 +18,18 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private final TimeZoneStorage timeZoneStorage;
+
+    public UserController(UserService userService, TimeZoneStorage timeZoneStorage) {
         this.userService = userService;
+        this.timeZoneStorage = timeZoneStorage;
     }
 
     @GetMapping("/register")
-    public String getRegistrationPage() {
+    public String getRegistrationPage(Model model) {
+        var zones = timeZoneStorage.getTimeZones();
+        model.addAttribute("timeZones", zones);
+        model.addAttribute("defaultTimeZone", timeZoneStorage.getDefaultTimeZone().getID());
         return "/users/register";
     }
 
@@ -50,7 +57,11 @@ public class UserController {
             model.addAttribute("error", "The login or password incorrect.");
             return "errors/404";
         }
-        initSession(userOptional.get(), request);
+        var loginedUser = userOptional.get();
+        if (loginedUser.getTimezone() == null) {
+            loginedUser.setTimezone(timeZoneStorage.getDefaultTimeZone().getID());
+        }
+        initSession(loginedUser, request);
         return "redirect:/tasks";
     }
 

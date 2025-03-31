@@ -25,20 +25,20 @@ public class TaskController {
 	private final CategoryService categoryService;
 
 	@GetMapping
-	public String getAllTasks(Model model) {
-		model.addAttribute("tasks", taskService.getAll());
+	public String getAllTasks(Model model, @SessionAttribute User user) {
+		model.addAttribute("tasks", taskService.getAll(user));
 		return "/tasks/allTasks";
 	}
 
 	@GetMapping("/completed")
-	public String getCompletedTasks(Model model) {
-		model.addAttribute("tasks", taskService.getCompletedTasks());
+	public String getCompletedTasks(Model model, @SessionAttribute User user) {
+		model.addAttribute("tasks", taskService.getCompletedTasks(user));
 		return "/tasks/completedTasks";
 	}
 
 	@GetMapping("/new")
-	public String getNewTasks(Model model) {
-		model.addAttribute("tasks", taskService.getNewTasks());
+	public String getNewTasks(Model model, @SessionAttribute User user) {
+		model.addAttribute("tasks", taskService.getNewTasks(user));
 		return "/tasks/newTasks";
 	}
 
@@ -50,7 +50,8 @@ public class TaskController {
 	}
 
 	@PostMapping("/create")
-	public String create(@ModelAttribute Task task, @RequestParam(required = false) Set<Integer> categoriesId, @SessionAttribute User user, Model model) {
+	public String create(@ModelAttribute Task task, @RequestParam(required = false) Set<Integer> categoriesId,
+						 @SessionAttribute User user, Model model) {
 		if (categoriesId == null) {
 			model.addAttribute("error", "Please select at least one category.");
 			return "/errors/404";
@@ -61,7 +62,7 @@ public class TaskController {
 
 	@GetMapping("{id}")
 	public String getTask(@PathVariable Long id, @SessionAttribute User user, Model model) {
-		if (taskByUser(id, user, model)) {
+		if (getTaskByUser(id, user, model)) {
 			return "/errors/404";
 		}
 		return "/tasks/one";
@@ -69,7 +70,7 @@ public class TaskController {
 
 	@GetMapping("/update/{id}")
 	public String getUpdateTaskPage(@PathVariable Long id, @SessionAttribute User user, Model model) {
-		if (taskByUser(id, user, model)) {
+		if (getTaskByUser(id, user, model)) {
 			return "/errors/404";
 		}
 		model.addAttribute("priorities", priorityService.findAll());
@@ -77,7 +78,7 @@ public class TaskController {
 		return "/tasks/update";
 	}
 
-	private boolean taskByUser(@PathVariable Long id, @SessionAttribute User user, Model model) {
+	private boolean getTaskByUser(@PathVariable Long id, @SessionAttribute User user, Model model) {
 		var taskOptional = taskService.findById(id);
 		if (taskOptional.isEmpty()) {
 			model.addAttribute("error", "Task with id " + id + " not found.");
@@ -88,6 +89,7 @@ public class TaskController {
 			model.addAttribute("error", "You do not have permission to edit this task.");
 			return true;
 		}
+		taskService.setTimeZoneByUser(task, user);
 		model.addAttribute("task", task);
 		return false;
 	}

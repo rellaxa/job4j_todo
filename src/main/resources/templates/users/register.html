@@ -69,7 +69,7 @@
             <form th:action="@{/users/register}" method="POST">
                 <div class="mb-3">
                     <label for="name" class="form-label"><b>Name</b></label>
-                    <input type="name" class="form-control" id="name" name="name" placeholder="Иван" required>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Иван" required>
                 </div>
                 <div class="mb-3">
                     <label for="login" class="form-label"><b>Login</b></label>
@@ -78,6 +78,16 @@
                 <div class="mb-3">
                     <label for="password" class="form-label"><b>Password</b></label>
                     <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="time-zone"><b>Time Zone</b></label>
+                    <select class="form-control" id="time-zone" name="timezone">
+                        <option th:each="timeZone : ${timeZones}"
+                                th:selected="${defaultTimeZone.equals(timeZone.timeId)}"
+                                th:value="${timeZone.timeId}"
+                                th:text="${timeZone.timeId + ' : ' + timeZone.displayName}">
+                        </option>
+                    </select>
                 </div>
                 <div class="mb-3 row">
                     <div class="col-12">
